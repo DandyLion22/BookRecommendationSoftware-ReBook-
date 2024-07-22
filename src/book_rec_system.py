@@ -2,6 +2,8 @@ from datetime import datetime
 import hashlib
 import time
 import networkx as nx
+import random
+import string
 
 
 class Book:
@@ -12,21 +14,77 @@ class Book:
         self.publish_year = publish_year
         self.isbn = isbn
         self.ratings = {}
+        self.average_rating = 0
+        self.comments = []
     
     def add_rating(self, user, rating):
         self.ratings[user.alias] = rating
 
-    def get_average_rating(self):
-        if not self.ratings:
-            return 0
-        return sum(self.ratings.values()) / len(self.ratings)
+    def add_comment(self, user_alias, comment):
+        self.comments.append({"user": user_alias, "comment": comment})
 
+    def get_average_rating(self):
+        return self.average_rating
+    
+    def get_comments(self):
+        return self.comments
+    
+    def get_title(self):
+        return self.title
+
+    def rate_book(self, user_alias, rating):
+        self.ratings[user_alias] = rating
+        self.average_rating = sum(self.ratings.values()) / len(self.ratings)
+    
 class Library:
     def __init__(self):
-        self.books = []
+        self.book_dicts = []  # list to store book dictionaries
+        self.books = []  # list to store Book objects
 
     def add_book(self, book):
         self.books.append(book)
+
+    def add_real_books(self):
+        real_books = [
+        {'author': 'J.K. Rowling', 'title': 'Harry Potter and the Philosopher\'s Stone', 'genre': 'Fantasy', 'year': 1997},
+        {'author': 'George R.R. Martin', 'title': 'A Game of Thrones', 'genre': 'Fantasy', 'year': 1996},
+        {'author': 'J.R.R. Tolkien', 'title': 'The Hobbit', 'genre': 'Fantasy', 'year': 1937},
+        {'author': 'Agatha Christie', 'title': 'Murder on the Orient Express', 'genre': 'Mystery', 'year': 1934},
+        {'author': 'Stephen King', 'title': 'The Shining', 'genre': 'Horror', 'year': 1977},
+        {'author': 'Isaac Asimov', 'title': 'Foundation', 'genre': 'Science Fiction', 'year': 1951},
+        {'author': 'Jane Austen', 'title': 'Pride and Prejudice', 'genre': 'Romance', 'year': 1813},
+        {'author': 'Mark Twain', 'title': 'The Adventures of Tom Sawyer', 'genre': 'Adventure', 'year': 1876},
+        {'author': 'Ernest Hemingway', 'title': 'The Old Man and the Sea', 'genre': 'Fiction', 'year': 1952},
+        {'author': 'F. Scott Fitzgerald', 'title': 'The Great Gatsby', 'genre': 'Fiction', 'year': 1925}
+    ]
+
+        for book in real_books:
+            isbn = ''.join(random.choice('1234567890') for _ in range(13))  # Generate a random 13-digit ISBN
+            book['isbn'] = isbn
+            book['ratings'] = {}  # Initialize ratings as an empty dictionary
+            book['average_rating'] = 0  # Initialize average_rating to 0
+            book['comments'] = []  # Initialize comments as an empty list
+            self.book_dicts.append(book)
+
+            new_book = Book(book['author'], book['title'], book['genre'], book['year'], isbn)
+            self.books.append(new_book)
+
+
+    def show_ranking(self):
+        books_with_avg_ratings = [(book['title'], sum(book['ratings'].values()) / len(book['ratings']) if book['ratings'] else 0) for book in self.book_dicts]
+        books_with_avg_ratings.sort(key=lambda x: x[1], reverse=True)  
+
+        books_ranking = "All books rankings: \n"
+        for rank, (title, avg_rating) in enumerate(books_with_avg_ratings, start=1):
+            books_ranking += f"{rank}: {title} -> {avg_rating}\n"
+        return books_ranking
+    
+    
+    def get_book_by_title(self, title):
+        for book in self.books:
+            if book.get_title() == title:
+                return book
+        return None
 
 class User:
     next_id = 1
@@ -47,6 +105,7 @@ class User:
         self.friends = []
         self.users_backup = {}
         self.users_backup[self.user_id] = self.alias
+        
 
     @staticmethod
     def hash_password(password):
@@ -55,8 +114,28 @@ class User:
     def check_password(self, password):
         return self.password_hash == self.hash_password(password)
 
-    def rate_book(self):
-        pass
+    def rate_book(self, library, title, rating):
+        for book in library.books:
+            if book.get_title() == title:
+                book.rate_book(self.alias, rating)
+                break
+
+        for book_dict in library.book_dicts:
+            if book_dict['title'] == title:
+                book_dict['ratings'][self.alias] = rating
+                book_dict['average_rating'] = sum(book_dict['ratings'].values()) / len(book_dict['ratings'])
+                break
+
+    def comment_book(self, library, title, comment):
+        for book in library.books:
+            if book.get_title() == title:
+                book.add_comment(self.alias, comment)
+                break
+
+        for book_dict in library.book_dicts:
+            if book_dict['title'] == title:
+                book_dict["comments"].append({"user": self.alias, "comment": comment})
+                break
 
     def get_rated_books(self):
         rated_books_str = f"{self.alias} rated the following books: \n"
@@ -196,15 +275,6 @@ class Rating:
 
     def filter_by(self):
         pass
-
-    def show_ranking(self, library):
-        books_with_avg_ratings = [(book.title, book.get_average_rating()) for book in library.books]
-        books_with_avg_ratings.sort(key=lambda x: x[1], reverse=True)  
-
-        books_ranking = "All books rankings: \n"
-        for rank, (title, avg_rating) in enumerate(books_with_avg_ratings, start=1):
-            books_ranking += f"{rank}: {title} -> {avg_rating}\n"
-        return books_ranking
     
 class RecomEngine:
     def __init__(self, library):
