@@ -3,9 +3,10 @@
 1.Einsicht Bücherranking ++
 2.Bücherbewertung abgeben (Score + Kommentar) 
 - Exit funktion einfügen ++
-- Insgesamt bessere Formatierung bei allen Funktionen
-- 
+- Insgesamt bessere Formatierung bei allen Funktionen ++
 
 3.Bücherempfehlung erhalten 
+- weitere Parameter einpflegen, siehe Notizzettel !
+
 4.BookMates (Social Platform) 
 5.Eigenes Profil einsehen

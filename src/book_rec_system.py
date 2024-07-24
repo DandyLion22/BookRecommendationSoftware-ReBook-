@@ -7,7 +7,7 @@ import string
 
 
 class Book:
-    def __init__(self, author, title, genre, publish_year, isbn):
+    def __init__(self, author, title, genre, publish_year, isbn, topics, length, complexity, purpose):
         self.author = author
         self.title = title
         self.genre = genre
@@ -16,6 +16,10 @@ class Book:
         self.ratings = {}
         self.average_rating = 0
         self.comments = []
+        self.topics = topics
+        self.length = length
+        self.complexity = complexity
+        self.purpose = purpose
     
     def add_rating(self, user, rating):
         self.ratings[user.alias] = rating
@@ -46,16 +50,16 @@ class Library:
 
     def add_real_books(self):
         real_books = [
-        {'author': 'J.K. Rowling', 'title': 'Harry Potter and the Philosopher\'s Stone', 'genre': 'Fantasy', 'year': 1997},
-        {'author': 'George R.R. Martin', 'title': 'A Game of Thrones', 'genre': 'Fantasy', 'year': 1996},
-        {'author': 'J.R.R. Tolkien', 'title': 'The Hobbit', 'genre': 'Fantasy', 'year': 1937},
-        {'author': 'Agatha Christie', 'title': 'Murder on the Orient Express', 'genre': 'Mystery', 'year': 1934},
-        {'author': 'Stephen King', 'title': 'The Shining', 'genre': 'Horror', 'year': 1977},
-        {'author': 'Isaac Asimov', 'title': 'Foundation', 'genre': 'Science Fiction', 'year': 1951},
-        {'author': 'Jane Austen', 'title': 'Pride and Prejudice', 'genre': 'Romance', 'year': 1813},
-        {'author': 'Mark Twain', 'title': 'The Adventures of Tom Sawyer', 'genre': 'Adventure', 'year': 1876},
-        {'author': 'Ernest Hemingway', 'title': 'The Old Man and the Sea', 'genre': 'Fiction', 'year': 1952},
-        {'author': 'F. Scott Fitzgerald', 'title': 'The Great Gatsby', 'genre': 'Fiction', 'year': 1925}
+        {'author': 'J.K. Rowling', 'title': 'Harry Potter and the Philosopher\'s Stone', 'genre': 'Fantasy', 'year': 1997, 'topics': ['Magic', 'Coming of Age'], 'length': 'Long', 'complexity': 'Medium', 'purpose': 'Entertainment'},
+        {'author': 'George R.R. Martin', 'title': 'A Game of Thrones', 'genre': 'Fantasy', 'year': 1996, 'topics': ['Politics', 'War'], 'length': 'Long', 'complexity': 'High', 'purpose': 'Entertainment'},
+        {'author': 'J.R.R. Tolkien', 'title': 'The Hobbit', 'genre': 'Fantasy', 'year': 1937, 'topics': ['Adventure', 'Mythology'], 'length': 'Medium', 'complexity': 'Medium', 'purpose': 'Entertainment'},
+        {'author': 'Agatha Christie', 'title': 'Murder on the Orient Express', 'genre': 'Mystery', 'year': 1934, 'topics': ['Crime', 'Detective'], 'length': 'Short', 'complexity': 'Low', 'purpose': 'Entertainment'},
+        {'author': 'Stephen King', 'title': 'The Shining', 'genre': 'Horror', 'year': 1977, 'topics': ['Supernatural', 'Psychology'], 'length': 'Long', 'complexity': 'High', 'purpose': 'Entertainment'},
+        {'author': 'Isaac Asimov', 'title': 'Foundation', 'genre': 'Science Fiction', 'year': 1951, 'topics': ['Technology', 'Future'], 'length': 'Medium', 'complexity': 'High', 'purpose': 'Learning'},
+        {'author': 'Jane Austen', 'title': 'Pride and Prejudice', 'genre': 'Romance', 'year': 1813, 'topics': ['Society', 'Marriage'], 'length': 'Medium', 'complexity': 'Medium', 'purpose': 'Entertainment'},
+        {'author': 'Mark Twain', 'title': 'The Adventures of Tom Sawyer', 'genre': 'Adventure', 'year': 1876, 'topics': ['Youth', 'Friendship'], 'length': 'Short', 'complexity': 'Low', 'purpose': 'Entertainment'},
+        {'author': 'Ernest Hemingway', 'title': 'The Old Man and the Sea', 'genre': 'Fiction', 'year': 1952, 'topics': ['Nature', 'Aging'], 'length': 'Short', 'complexity': 'Medium', 'purpose': 'Entertainment'},
+        {'author': 'F. Scott Fitzgerald', 'title': 'The Great Gatsby', 'genre': 'Fiction', 'year': 1925, 'topics': ['Wealth', 'American Dream'], 'length': 'Short', 'complexity': 'Medium', 'purpose': 'Entertainment'}
     ]
 
         for book in real_books:
@@ -66,7 +70,7 @@ class Library:
             book['comments'] = []  # Initialize comments as an empty list
             self.book_dicts.append(book)
 
-            new_book = Book(book['author'], book['title'], book['genre'], book['year'], isbn)
+            new_book = Book(book['author'], book['title'], book['genre'], book['year'], isbn, book["topics"], book["length"], book["complexity"], book["purpose"])
             self.books.append(new_book)
 
 

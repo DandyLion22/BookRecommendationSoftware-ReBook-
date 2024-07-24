@@ -39,21 +39,39 @@ def main():
 
         while True:
             if user_db.logged_in:
-                action = input("Would you like to see your profile, edit your profile, log out, or exit? Or use the main functions: see book rankings, see/edit your book ratings or book comments, receive a book recommendation, engage on BookMate? Type \"see profile\", \"edit profile\", \"logout\", or \"exit\". The other functions are: \"see book rankings\", \"see/edit book ratings\", \"book recommendation\", \"BookMate\".")
-                if action.lower() == "see profile":
+                action = input(Fore.GREEN + "Would you like to:\n"
+                           + "1. See your profile\n"
+                           + "2. Edit your profile\n"
+                           + "3. Log out\n"
+                           + Fore.BLUE + "Or:\n"
+                           + "4. See book rankings\n"
+                           + "5. See/edit book ratings or book comments\n"
+                           + "6. Receive a book recommendation\n"
+                           + "7. Engage on BookMate\n"
+                           + Fore.RED + "Or:\n"
+                           + "8. Exit\n" + Style.RESET_ALL
+                           + "Type the corresponding number or function name: ")
+                if action.lower() == "see profile" or action.lower() == "1":
                     user_db.see_profile() 
-                elif action.lower() == "edit profile":
+                elif action.lower() == "edit profile" or action.lower() == "2":
                     user_db.edit_profile()  
-                elif action.lower() == "logout":
+                elif action.lower() == "logout" or action.lower() == "3":
                     user_db.logout()
-                elif action.lower() == "exit":
+                elif action.lower() == "exit" or action.lower() == "8":
                     break
-                elif action.lower() == "see book rankings":
+                elif action.lower() == "see book rankings" or action.lower() == "4":
                     print(main_library.show_ranking())
-                elif action.lower() == "see/edit book ratings":
+                elif action.lower() == "see/edit book ratings or book comments" or action.lower() == "5":
                     while True:
-                        action = input("Would you like to rate a book, see a book's rating, comment on a book, or see a book's comments? Type \"rate book\", \"see rating\" ,\"comment book\", \"see book comments\", or \"exit\" to go back. ")
-                        if action.lower() == "rate book":
+                        action = input(Fore.GREEN + "Would you like to:\n"
+                    + "1. Rate book\n"
+                    + "2. See rating\n"
+                    + "3. Comment book\n"
+                    + "4. See book comments\n"
+                    + Fore.RED + "Or:\n"
+                    + "5. Exit\n" + Style.RESET_ALL
+                    + "Type the corresponding number or function name: ")
+                        if action.lower() == "rate book" or action.lower() == "1":
                             while True:
                                 title = input("Enter the title of the book you want to rate or \"exit\" to go back: ")
                                 if title.lower() == "exit":
@@ -65,7 +83,7 @@ def main():
                                     break
                                 else:
                                     print("Book not found. Please try again.")
-                        elif action.lower() == "see rating":
+                        elif action.lower() == "see rating" or action.lower() == "2":
                             while True:
                                 title = input("Enter the title of the book whose rating you want to see or \"exit\" to go back: ")
                                 if title.lower() == "exit":
@@ -76,7 +94,7 @@ def main():
                                     break
                                 else:
                                     print("Book not found. Please try again.")
-                        elif action.lower() == "comment book":
+                        elif action.lower() == "comment book" or action.lower() == "3":
                             while True:
                                 title = input("Enter the title of the book you want to comment on or \"exit\" to go back: ")
                                 if title.lower() == "exit":
@@ -88,7 +106,7 @@ def main():
                                     break
                                 else:
                                     print("Book not found. Please try again.")
-                        elif action.lower() == "see book comments":
+                        elif action.lower() == "see book comments" or action.lower() == "4":
                             while True:
                                 title = input("Enter the title of the book you want to see comments for or \"exit\" to go back: ")
                                 if title.lower() == "exit":
@@ -99,7 +117,7 @@ def main():
                                     break
                                 else:
                                     print("Book not found. Please try again.")
-                        elif action.lower() == "exit":
+                        elif action.lower() == "exit" or action.lower() == "5":
                             break
 
             else:
