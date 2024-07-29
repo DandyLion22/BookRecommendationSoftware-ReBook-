@@ -35,6 +35,7 @@ def main():
         user_db = UserDatabase()
         main_library = Library()
         main_library.add_real_books()
+        recom_engine = RecomEngine(main_library.get_book_dicts())
 
 
         while True:
@@ -119,6 +120,8 @@ def main():
                                     print("Book not found. Please try again.")
                         elif action.lower() == "exit" or action.lower() == "5":
                             break
+                elif action.lower() == "receive a book recommendation" or action.lower() == "6":
+                    pass
 
             else:
                 action = input("Would you like to log in, create a profile, or exit? Type \"login\", \"create profile\", or \"exit\" ")

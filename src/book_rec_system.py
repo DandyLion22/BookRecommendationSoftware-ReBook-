@@ -4,10 +4,11 @@ import time
 import networkx as nx
 import random
 import string
+import heapq
 
 
 class Book:
-    def __init__(self, author, title, genre, publish_year, isbn, topics, length, complexity, purpose):
+    def __init__(self, author, title, genre, publish_year, isbn, topics, length, complexity, purpose, mood):
         self.author = author
         self.title = title
         self.genre = genre
@@ -20,6 +21,7 @@ class Book:
         self.length = length
         self.complexity = complexity
         self.purpose = purpose
+        self.mood = mood
     
     def add_rating(self, user, rating):
         self.ratings[user.alias] = rating
@@ -50,37 +52,42 @@ class Library:
 
     def add_real_books(self):
         real_books = [
-        {'author': 'J.K. Rowling', 'title': 'Harry Potter and the Philosopher\'s Stone', 'genre': 'Fantasy', 'year': 1997, 'topics': ['Magic', 'Coming of Age'], 'length': 'Long', 'complexity': 'Medium', 'purpose': 'Entertainment'},
-        {'author': 'George R.R. Martin', 'title': 'A Game of Thrones', 'genre': 'Fantasy', 'year': 1996, 'topics': ['Politics', 'War'], 'length': 'Long', 'complexity': 'High', 'purpose': 'Entertainment'},
-        {'author': 'J.R.R. Tolkien', 'title': 'The Hobbit', 'genre': 'Fantasy', 'year': 1937, 'topics': ['Adventure', 'Mythology'], 'length': 'Medium', 'complexity': 'Medium', 'purpose': 'Entertainment'},
-        {'author': 'Agatha Christie', 'title': 'Murder on the Orient Express', 'genre': 'Mystery', 'year': 1934, 'topics': ['Crime', 'Detective'], 'length': 'Short', 'complexity': 'Low', 'purpose': 'Entertainment'},
-        {'author': 'Stephen King', 'title': 'The Shining', 'genre': 'Horror', 'year': 1977, 'topics': ['Supernatural', 'Psychology'], 'length': 'Long', 'complexity': 'High', 'purpose': 'Entertainment'},
-        {'author': 'Isaac Asimov', 'title': 'Foundation', 'genre': 'Science Fiction', 'year': 1951, 'topics': ['Technology', 'Future'], 'length': 'Medium', 'complexity': 'High', 'purpose': 'Learning'},
-        {'author': 'Jane Austen', 'title': 'Pride and Prejudice', 'genre': 'Romance', 'year': 1813, 'topics': ['Society', 'Marriage'], 'length': 'Medium', 'complexity': 'Medium', 'purpose': 'Entertainment'},
-        {'author': 'Mark Twain', 'title': 'The Adventures of Tom Sawyer', 'genre': 'Adventure', 'year': 1876, 'topics': ['Youth', 'Friendship'], 'length': 'Short', 'complexity': 'Low', 'purpose': 'Entertainment'},
-        {'author': 'Ernest Hemingway', 'title': 'The Old Man and the Sea', 'genre': 'Fiction', 'year': 1952, 'topics': ['Nature', 'Aging'], 'length': 'Short', 'complexity': 'Medium', 'purpose': 'Entertainment'},
-        {'author': 'F. Scott Fitzgerald', 'title': 'The Great Gatsby', 'genre': 'Fiction', 'year': 1925, 'topics': ['Wealth', 'American Dream'], 'length': 'Short', 'complexity': 'Medium', 'purpose': 'Entertainment'}
-    ]
+            {'author': 'J.K. Rowling', 'title': 'Harry Potter and the Philosopher\'s Stone', 'genre': 'Fantasy', 'year': 1997, 'topics': ['Magic', 'Coming of Age'], 'length': 'Long', 'complexity': 'Medium', 'purpose': 'Entertainment', 'mood': 'Exciting'},
+            {'author': 'George R.R. Martin', 'title': 'A Game of Thrones', 'genre': 'Fantasy', 'year': 1996, 'topics': ['Politics', 'War'], 'length': 'Long', 'complexity': 'High', 'purpose': 'Entertainment', 'mood': 'Dark'},
+            {'author': 'J.R.R. Tolkien', 'title': 'The Hobbit', 'genre': 'Fantasy', 'year': 1937, 'topics': ['Adventure', 'Mythology'], 'length': 'Medium', 'complexity': 'Medium', 'purpose': 'Entertainment', 'mood': 'Adventurous'},
+            {'author': 'Agatha Christie', 'title': 'Murder on the Orient Express', 'genre': 'Mystery', 'year': 1934, 'topics': ['Crime', 'Detective'], 'length': 'Short', 'complexity': 'Low', 'purpose': 'Entertainment', 'mood': 'Suspenseful'},
+            {'author': 'Stephen King', 'title': 'The Shining', 'genre': 'Horror', 'year': 1977, 'topics': ['Supernatural', 'Psychology'], 'length': 'Long', 'complexity': 'High', 'purpose': 'Entertainment', 'mood': 'Terrifying'},
+            {'author': 'Isaac Asimov', 'title': 'Foundation', 'genre': 'Science Fiction', 'year': 1951, 'topics': ['Technology', 'Future'], 'length': 'Medium', 'complexity': 'High', 'purpose': 'Learning', 'mood': 'Intriguing'},
+            {'author': 'Jane Austen', 'title': 'Pride and Prejudice', 'genre': 'Romance', 'year': 1813, 'topics': ['Society', 'Marriage'], 'length': 'Medium', 'complexity': 'Medium', 'purpose': 'Entertainment', 'mood': 'Romantic'},
+            {'author': 'Mark Twain', 'title': 'The Adventures of Tom Sawyer', 'genre': 'Adventure', 'year': 1876, 'topics': ['Youth', 'Friendship'], 'length': 'Short', 'complexity': 'Low', 'purpose': 'Entertainment', 'mood': 'Fun'},
+            {'author': 'Ernest Hemingway', 'title': 'The Old Man and the Sea', 'genre': 'Fiction', 'year': 1952, 'topics': ['Nature', 'Aging'], 'length': 'Short', 'complexity': 'Medium', 'purpose': 'Entertainment', 'mood': 'Melancholic'},
+            {'author': 'F. Scott Fitzgerald', 'title': 'The Great Gatsby', 'genre': 'Fiction', 'year': 1925, 'topics': ['Wealth', 'American Dream'], 'length': 'Short', 'complexity': 'Medium', 'purpose': 'Entertainment', 'mood': 'Reflective'}
+        ]
 
         for book in real_books:
             isbn = ''.join(random.choice('1234567890') for _ in range(13))  # Generate a random 13-digit ISBN
             book['isbn'] = isbn
-            book['ratings'] = {}  # Initialize ratings as an empty dictionary
+            book['ratings'] = {"User1": random.randint(0, 10)}  # Initialize ratings as a dictionary with an initial randomized value
             book['average_rating'] = 0  # Initialize average_rating to 0
             book['comments'] = []  # Initialize comments as an empty list
             self.book_dicts.append(book)
 
-            new_book = Book(book['author'], book['title'], book['genre'], book['year'], isbn, book["topics"], book["length"], book["complexity"], book["purpose"])
+            new_book = Book(book['author'], book['title'], book['genre'], book['year'], isbn, book["topics"], book["length"], book["complexity"], book["purpose"], book["mood"])
             self.books.append(new_book)
 
 
     def show_ranking(self):
-        books_with_avg_ratings = [(book['title'], sum(book['ratings'].values()) / len(book['ratings']) if book['ratings'] else 0) for book in self.book_dicts]
-        books_with_avg_ratings.sort(key=lambda x: x[1], reverse=True)  
+        # Create a max heap with the negative average ratings as the priorities
+        heap = [(-sum(book['ratings'].values()) / len(book['ratings']) if book['ratings'] else 0, book['title']) for book in self.book_dicts]
+        heapq.heapify(heap)
 
         books_ranking = "All books rankings: \n"
-        for rank, (title, avg_rating) in enumerate(books_with_avg_ratings, start=1):
-            books_ranking += f"{rank}: {title} -> {avg_rating}\n"
+        rank = 1
+        while heap:
+            avg_rating, title = heapq.heappop(heap)
+            books_ranking += f"{rank}: {title} -> {-avg_rating}\n"  # Negate the average rating to get the original value
+            rank += 1
+
         return books_ranking
     
     
@@ -89,6 +96,9 @@ class Library:
             if book.get_title() == title:
                 return book
         return None
+    
+    def get_book_dicts(self):
+        return self.book_dicts
 
 class User:
     next_id = 1
@@ -107,6 +117,7 @@ class User:
         self.current_book = {}
         self.read_books = {}
         self.friends = []
+        self.disliked_books = {}
         self.users_backup = {}
         self.users_backup[self.user_id] = self.alias
         
@@ -283,15 +294,30 @@ class Rating:
 class RecomEngine:
     def __init__(self, library):
         self.library = library
+        self.heap = self.create_heap()
+
+    def create_heap(self):
+    # Create a max heap with the negative average ratings as the priorities
+        heap = [(-sum(book['ratings'].values()) / len(book['ratings']) if book['ratings'] else 0, book['title'], book) for book in self.library]
+        heapq.heapify(heap)
+        return heap
     
-    def recom_by_genre(self):
-        pass
+    def recom_by_genre(self, genre):
+        return [book for book in self.library if book['genre'] == genre]
 
     def recom_by_similarity(self):
         pass
 
-    def recom_by_top_rated(self):
-        pass
+    def recom_by_top_rated(self, n):
+    # Return the top n books
+        top_books = []
+        for _ in range(n):
+            if not self.heap:
+                break
+            avg_rating, title, book = heapq.heappop(self.heap)
+            top_books.append((title, -avg_rating))
+        return top_books
+        
 
 class RatingSystem:
     def __init__(self):
