@@ -1,7 +1,9 @@
 # Import relevant packages and classes
 
 import os
-from colorama import Fore, Style
+from pprint import pprint
+from colorama import Fore, Back, Style, init
+init(autoreset=True)
 from book_rec_system import Book, User, Library, Rating, RatingSystem, RecomEngine, UserDatabase, LoginFailedException
 import time
 
@@ -121,7 +123,36 @@ def main():
                         elif action.lower() == "exit" or action.lower() == "5":
                             break
                 elif action.lower() == "receive a book recommendation" or action.lower() == "6":
-                    pass
+                    while True:
+                        action = input(Fore.GREEN + "Would you like to:\n"
+                    + "1. Receive recommendation based on genre\n"
+                    + "2. Receive recommendation based on rating\n"
+                    + "3. Receive a guided recommendation\n"
+                    + Fore.RED + "Or:\n"
+                    + "4. Exit\n" + Style.RESET_ALL
+                    + "Type the corresponding number or function name: ")
+                        if action.lower() == "receive recommendation based on genre" or action.lower() == "1":
+                            while True:
+                                genres = main_library.get_unique_genres()
+                                print("Available genres: " + ", ".join(genres))
+                                genre = input("Enter your preferred genre or \"exit\" to go back: ")
+                                if genre.lower() == "exit":
+                                    break
+                                elif genre in genres:
+                                    recommended_books = recom_engine.recom_by_genre(genre)
+                                    colors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.WHITE]
+                                    for i, book in enumerate(recommended_books):
+                                        print(colors[i % len(colors)] + book['title'] + '\n')
+                                        pprint(book)
+                                        print(Style.RESET_ALL) #Color selection for books is based on their index, using modulo operation with the number of colors, causing color repetition if books outnumber colors.
+                                else:
+                                    print("Genre not found. Please try again.")
+                        elif action.lower() == "receive recommendation based on rating" or action.lower() == "2":
+                            pass
+                        elif action.lower() == "receive a guided recommendation" or action.lower() == "3":
+                            pass
+                        elif action.lower() == "exit" or action.lower() == "4":
+                            break
 
             else:
                 action = input("Would you like to log in, create a profile, or exit? Type \"login\", \"create profile\", or \"exit\" ")

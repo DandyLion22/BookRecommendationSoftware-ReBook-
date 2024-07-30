@@ -8,14 +8,14 @@ import heapq
 
 
 class Book:
-    def __init__(self, author, title, genre, publish_year, isbn, topics, length, complexity, purpose, mood):
+    def __init__(self, author, title, genre, publish_year, isbn, topics, length, complexity, purpose, mood, average_rating):
         self.author = author
         self.title = title
         self.genre = genre
         self.publish_year = publish_year
         self.isbn = isbn
         self.ratings = {}
-        self.average_rating = 0
+        self.average_rating = average_rating
         self.comments = []
         self.topics = topics
         self.length = length
@@ -68,11 +68,12 @@ class Library:
             isbn = ''.join(random.choice('1234567890') for _ in range(13))  # Generate a random 13-digit ISBN
             book['isbn'] = isbn
             book['ratings'] = {"User1": random.randint(0, 10)}  # Initialize ratings as a dictionary with an initial randomized value
-            book['average_rating'] = 0  # Initialize average_rating to 0
+            average_rating = sum(book['ratings'].values()) / len(book['ratings']) if book['ratings'] else 0
+            book['average_rating'] = average_rating
             book['comments'] = []  # Initialize comments as an empty list
             self.book_dicts.append(book)
 
-            new_book = Book(book['author'], book['title'], book['genre'], book['year'], isbn, book["topics"], book["length"], book["complexity"], book["purpose"], book["mood"])
+            new_book = Book(book['author'], book['title'], book['genre'], book['year'], isbn, book["topics"], book["length"], book["complexity"], book["purpose"], book["mood"], average_rating)
             self.books.append(new_book)
 
 
@@ -99,6 +100,12 @@ class Library:
     
     def get_book_dicts(self):
         return self.book_dicts
+    
+    def get_unique_genres(self):
+        genres = set()
+        for book in self.books:
+            genres.add(book.genre)
+        return list(genres)
 
 class User:
     next_id = 1

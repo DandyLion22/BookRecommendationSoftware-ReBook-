@@ -13,3 +13,4 @@
 
 4.BookMates (Social Platform) 
 5.Eigenes Profil einsehen
+- Persönliche Angaben (Lieblingsbücher, aktuell gelesenes Buch, etc...)
