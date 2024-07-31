@@ -148,7 +148,44 @@ def main():
                                 else:
                                     print("Genre not found. Please try again.")
                         elif action.lower() == "receive recommendation based on rating" or action.lower() == "2":
-                            pass
+                            recommended_books_1 = None
+                            recommended_books_2 = None
+                            while True:
+                                rating_option = input(Fore.GREEN + "Do you want to:\n"
+                                    + Fore.YELLOW + "1. " + Fore.CYAN + "See the top-rated books\n"
+                                    + Fore.YELLOW + "2. " + Fore.CYAN + "Choose by minimum rating\n"
+                                    + Fore.RED + "Or:\n"
+                                    + Fore.YELLOW + "3. " + Fore.CYAN + "Exit\n" + Style.RESET_ALL
+                                    + "Type the corresponding number or function name: ")
+                                if rating_option.lower() == "exit" or rating_option.lower() == "3":
+                                    break
+                                elif rating_option.lower() == "see the top-rated books" or rating_option.lower() == "1":
+                                    try:
+                                        num_books = int(input("How many top-rated books do you want to see? "))
+                                        recommended_books_1 = recom_engine.recom_by_top_rated(num_books)
+                                        colors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.WHITE]
+                                        if recommended_books_1:
+                                            for i, book in enumerate(recommended_books_1):
+                                                print(colors[i % len(colors)] + book[0] + ' - Rating: ' + str(book[1]) + '\n')
+                                                print(Style.RESET_ALL)
+                                    except ValueError:
+                                        print("Invalid input. Please enter a number.")
+                                elif rating_option.lower() == "choose by minimum rating" or rating_option.lower() == "2":
+                                    try:
+                                        min_rating = float(input("Enter your minimum preferred rating: "))
+                                        recommended_books_2 = recom_engine.recom_by_rating(min_rating)
+                                        colors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA, Fore.CYAN, Fore.WHITE]
+                                        if recommended_books_2:
+                                            for i, book in enumerate(recommended_books_2):
+                                                print(colors[i % len(colors)] + book['title'] + '\n')
+                                                pprint(book)
+                                                print(Style.RESET_ALL)
+                                    except ValueError:
+                                        print("Invalid input. Please enter a number.")
+                                else:
+                                    print("Invalid option. Please try again.")
+                                    continue
+
                         elif action.lower() == "receive a guided recommendation" or action.lower() == "3":
                             pass
                         elif action.lower() == "exit" or action.lower() == "4":

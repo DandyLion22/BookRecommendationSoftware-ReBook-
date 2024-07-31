@@ -106,6 +106,12 @@ class Library:
         for book in self.books:
             genres.add(book.genre)
         return list(genres)
+    
+    def get_ratings(self):
+        ratings = list()
+        for book in self.books:
+            ratings.add(book.average_rating)
+        return ratings
 
 class User:
     next_id = 1
@@ -316,15 +322,26 @@ class RecomEngine:
         pass
 
     def recom_by_top_rated(self, n):
-    # Return the top n books
         top_books = []
+        heap_copy = self.heap.copy()  # create a copy of the heap
         for _ in range(n):
-            if not self.heap:
+            if not heap_copy:  # use the copy for popping items
                 break
-            avg_rating, title, book = heapq.heappop(self.heap)
+            avg_rating, title, book = heapq.heappop(heap_copy)
             top_books.append((title, -avg_rating))
         return top_books
+    
+    def recom_by_rating(self, min_rating):
+        # Get all books
+        all_books = [book for book in self.library]
         
+        # Filter books based on the minimum rating
+        filtered_books = [book for book in all_books if book["average_rating"] >= min_rating]
+        
+        # Sort the filtered books by rating in descending order
+        sorted_books = sorted(filtered_books, key=lambda book: book["average_rating"], reverse=True)
+    
+        return sorted_books
 
 class RatingSystem:
     def __init__(self):
