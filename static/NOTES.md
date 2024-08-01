@@ -8,8 +8,8 @@
 
 3.Bücherempfehlung erhalten 
 - weitere Parameter einpflegen, siehe Notizzettel ++
-- Engine erstellen, evtl. Probleme mit MaxHeap
-- Main Recommendation Loop erstellen
+- Engine erstellen, evtl. Probleme mit MaxHeap ++
+- Main Recommendation Loop erstellen -> Probleme mit Rating (aktuell werden mehrere Optionen angezeigt, was nicht sein sollte!)
 
 4.BookMates (Social Platform) 
 5.Eigenes Profil einsehen

@@ -187,7 +187,7 @@ def main():
                                     continue
 
                         elif action.lower() == "receive a guided recommendation" or action.lower() == "3":
-                            pass
+                            recom_engine.guided_recommendation()
                         elif action.lower() == "exit" or action.lower() == "4":
                             break
 

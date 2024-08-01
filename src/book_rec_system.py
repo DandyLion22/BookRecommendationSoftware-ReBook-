@@ -318,8 +318,60 @@ class RecomEngine:
     def recom_by_genre(self, genre):
         return [book for book in self.library if book['genre'] == genre]
 
-    def recom_by_similarity(self):
-        pass
+    def guided_recommendation(self):
+        # Initialize scores
+        scores = {book['title']: 0 for book in self.library}
+
+        # Define the questions and the attributes they correspond to
+        questions = [
+            ("genre", "What is your preferred genre?"),
+            ("length", "What is your preferred length?"),
+            ("topics", "What is your preferred topic?"),
+            ("complexity", "What is your preferred complexity?"),
+            ("author", "What is your preferred author?"),
+            ("purpose", "What is your reading purpose?"),
+            ("mood", "What is your preferred mood?"),
+            ("average_rating", "What is your preferred minimum rating?"),
+            ("year", "What is your preferred minimum publishing year?")
+            # Add more questions here
+        ]
+
+        for attribute, question in questions:
+            if attribute in ["rating", "year"]:
+                # For rating and year, ask for a minimum value
+                answer = float(input(question))
+                for book in self.library:
+                    if book[attribute] >= answer:
+                        scores[book['title']] += 1
+            else:
+                # For other attributes, get all unique values
+                options = set(option for book in self.library for option in (book[attribute] if isinstance(book[attribute], list) else [book[attribute]]))
+
+            while True:
+                # Display the question and the available options to the user
+                print(question)
+                for option in options:
+                    print(option)
+                
+                # Get user's answer
+                answer = input()
+
+                # Check if the answer is valid
+                if answer not in options:
+                    print("Invalid option. Please try again.")
+                    continue
+
+                # Update scores
+                for book in self.library:
+                    if book[attribute] == answer:
+                        scores[book['title']] += 1
+                
+                # Break the loop if the answer is valid
+                break
+
+        # Sort books based on scores and return top-rated books
+        sorted_books = sorted(self.library, key=lambda book: scores[book['title']], reverse=True)
+        return sorted_books[:10]
 
     def recom_by_top_rated(self, n):
         top_books = []
