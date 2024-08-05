@@ -5,6 +5,8 @@ import networkx as nx
 import random
 import string
 import heapq
+from rich import print
+from rich.table import Table
 
 
 class Book:
@@ -337,7 +339,7 @@ class RecomEngine:
         ]
 
         for attribute, question in questions:
-            if attribute in ["rating", "year"]:
+            if attribute in ["average_rating", "year"]:
                 # For rating and year, ask for a minimum value
                 answer = float(input(question))
                 for book in self.library:
@@ -347,31 +349,46 @@ class RecomEngine:
                 # For other attributes, get all unique values
                 options = set(option for book in self.library for option in (book[attribute] if isinstance(book[attribute], list) else [book[attribute]]))
 
-            while True:
-                # Display the question and the available options to the user
-                print(question)
-                for option in options:
-                    print(option)
-                
-                # Get user's answer
-                answer = input()
+                while True:
+                    # Display the question and the available options to the user
+                    print(question)
+                    for option in options:
+                        print(option)
+                    
+                    # Get user's answer
+                    answer = input()
 
-                # Check if the answer is valid
-                if answer not in options:
-                    print("Invalid option. Please try again.")
-                    continue
+                    # Check if the answer is valid
+                    if answer not in options:
+                        print("Invalid option. Please try again.")
+                        continue
 
-                # Update scores
-                for book in self.library:
-                    if book[attribute] == answer:
-                        scores[book['title']] += 1
-                
-                # Break the loop if the answer is valid
-                break
+                    # Update scores
+                    for book in self.library:
+                        if book[attribute] == answer:
+                            scores[book['title']] += 1
+                    
+                    # Break the loop if the answer is valid
+                    break
 
         # Sort books based on scores and return top-rated books
         sorted_books = sorted(self.library, key=lambda book: scores[book['title']], reverse=True)
-        return sorted_books[:10]
+        print(sorted_books[:10])
+
+        # Create a table
+        table = Table(title="Top 10 Book Recommendations")
+
+        # Add columns
+        table.add_column("Rank", style="cyan")
+        table.add_column("Title", style="magenta")
+        table.add_column("Score", style="green")
+
+        # Add rows
+        for i, book in enumerate(sorted_books, start=1):
+            table.add_row(str(i), book['title'], str(scores[book['title']]))
+
+        # Print the table
+        print(table)
 
     def recom_by_top_rated(self, n):
         top_books = []
