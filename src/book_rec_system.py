@@ -8,6 +8,7 @@ import heapq
 from rich import print
 from rich.table import Table
 from colorama import Fore, Back, Style, init
+import json
 
 
 class Book:
@@ -119,13 +120,16 @@ class Library:
 class User:
     next_id = 1
 
-    def __init__(self, first_name, last_name, alias, password):
+    def __init__(self, first_name, last_name, alias, password=None, password_hash=None):
         self.first_name = first_name
         self.last_name = last_name
         self.user_id = User.next_id
         User.next_id += 1
         self.alias = alias
-        self.password_hash = self.hash_password(password)
+        if password_hash is not None:
+            self.password_hash = password_hash
+        else:
+            self.password_hash = self.hash_password(password)
         self.favourite_book = {}
         self.favourite_quote = None
         self.favourite_author = None
@@ -143,7 +147,7 @@ class User:
         return hashlib.sha256(password.encode()).hexdigest()
     
     def check_password(self, password):
-        return self.password_hash == self.hash_password(password)
+        return self.hash_password(password) == self.password_hash
 
     def rate_book(self, library, title, rating):
         for book in library.books:
@@ -202,7 +206,57 @@ class UserDatabase:
         self.add_user(new_user)
         self.graph.add_node(new_user.user_id)
         print("Your profile has been created successfully! Another bookworm joined the team!")
+        self.save_profiles()
         return alias
+
+    def save_profiles(self):
+        profiles = []
+        for user in self.users.values():
+            profile = {
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'alias': user.alias,
+                'password_hash': user.password_hash,
+                'favourite_book': user.favourite_book,
+                'favourite_quote': user.favourite_quote,
+                'favourite_author': user.favourite_author,
+                'rated_books': user.rated_books,
+                'current_book': user.current_book,
+                'read_books': user.read_books,
+                'friends': [friend.alias for friend in user.friends],
+                'disliked_books': user.disliked_books,
+                'users_backup': user.users_backup
+            }
+            profiles.append(profile)
+        
+        with open('profiles.json', 'w') as f: 
+            json.dump(profiles, f)
+
+    def load_profiles(self):
+        try:
+            with open('profiles.json', 'r') as f:
+                profiles = json.load(f)
+        except FileNotFoundError:
+            profiles = []
+
+        for profile in profiles:
+            password_hash = profile.get('password_hash')
+            if password_hash is None:
+                print(f"Warning: profile for {profile['alias']} does not have a password hash. Skipping this profile.")
+                continue
+            user = User(profile['first_name'], profile['last_name'], profile['alias'], password_hash=password_hash)
+            user.favourite_book = profile.get('favourite_book')
+            user.favourite_quote = profile.get('favourite_quote')
+            user.favourite_author = profile.get('favourite_author')
+            user.rated_books = profile.get('rated_books')
+            user.current_book = profile.get('current_book')
+            user.read_books = profile.get('read_books')
+            user.friends = profile.get('friends', [])
+            user.disliked_books = profile.get('disliked_books')
+            user.users_backup = profile.get('users_backup')
+            self.add_user(user)
+            self.graph.add_node(user.user_id)
+
 
     def login(self, alias=None):
         counter = 0
@@ -215,7 +269,8 @@ class UserDatabase:
         while True:
             password = input("Enter your password: ")
             counter += 1
-            if self.users[alias].check_password(password):
+            input_password_hash = self.users[alias].hash_password(password)
+            if input_password_hash == self.users[alias].password_hash:
                 print("You have successfully logged in!")
                 self.current_user = self.users[alias]
                 self.logged_in = True
@@ -280,15 +335,19 @@ class UserDatabase:
                     "publication_year": new_book_publication_year,
                     "genre": new_book_genre
                 }
+                self.save_profiles()
             elif action == "2" or action.lower() == "your favourite quote":
                 new_quote = input("Enter your new favourite quote: ")
                 self.current_user.favourite_quote = new_quote
+                self.save_profiles()
             elif action == "3" or action.lower() == "your favourite author":
                 new_author = input("Enter your new favourite author: ")
                 self.current_user.favourite_author = new_author
+                self.save_profiles()
             elif action == "4" or action.lower() == "what book you are currently reading":
                 new_book = input("Enter the book you are currently reading: ")
                 self.current_user.current_book = new_book
+                self.save_profiles()
             elif action == "5" or action.lower() == "your friendslist":
                 while True:
                     choice = input("Do you want to add a friend, delete a friend, view your friend list, or exit? Type 'add', 'delete', 'view', or 'exit': ")
@@ -299,6 +358,7 @@ class UserDatabase:
                         new_friend_alias = input("Enter the alias of the new friend you want to add: ")
                         if new_friend_alias in self.users:
                             self.add_friendship(self.current_user.alias, new_friend_alias)
+                            self.save_profiles()
                             break
                         else:
                             print("This user does not exist. Please try again.")
@@ -306,6 +366,7 @@ class UserDatabase:
                         friend_alias = input("Enter the alias of the friend you want to delete: ")
                         if friend_alias in self.current_user.friends:
                             self.remove_friendship(self.current_user.alias, friend_alias)
+                            self.save_profiles()
                             break
                         else:
                             print("This user is not in your friends list. Please try again.")

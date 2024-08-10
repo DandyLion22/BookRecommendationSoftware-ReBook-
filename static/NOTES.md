@@ -12,8 +12,12 @@
 - Main Recommendation Loop erstellen -> Probleme mit Rating (aktuell werden mehrere Optionen angezeigt, was nicht sein sollte!) ++
 
 4.BookMates (Social Platform)
-- Wie Profile längerfristig speicher (SQL?)?
+- Wie Profile längerfristig speicher (SQL?)? ++ -> JSON file
 - BookMate Menü erstellen
 - 
 5.Eigenes Profil einsehen
-- Persönliche Angaben (Lieblingsbücher, aktuell gelesenes Buch, etc...)
+- Persönliche Angaben (Lieblingsbücher, aktuell gelesenes Buch, etc...) ++
+
+
+6.Bug Testing/Fixing
+

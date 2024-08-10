@@ -38,6 +38,7 @@ def main():
         main_library = Library()
         main_library.add_real_books()
         recom_engine = RecomEngine(main_library.get_book_dicts())
+        user_db.load_profiles()
 
 
         while True:
