@@ -34,13 +34,14 @@ print("============================================")
 # Main loop
 
 def main():
+        #setting up database, adding books, loading recommendation engine, loading saved profiles
         user_db = UserDatabase()
         main_library = Library()
         main_library.add_real_books()
         recom_engine = RecomEngine(main_library.get_book_dicts())
         user_db.load_profiles()
 
-
+        #main menu
         while True:
             if user_db.logged_in:
                 action = input(Fore.GREEN + "Would you like to:\n"
@@ -56,7 +57,7 @@ def main():
                            + "8. Exit\n" + Style.RESET_ALL
                            + "Type the corresponding number or function name: ")
                 if action.lower() == "see profile" or action.lower() == "1":
-                    user_db.see_profile() 
+                    user_db.see_profile(user_db.current_user) 
                 elif action.lower() == "edit profile" or action.lower() == "2":
                     user_db.edit_profile()  
                 elif action.lower() == "logout" or action.lower() == "3":
@@ -191,6 +192,53 @@ def main():
                             recom_engine.guided_recommendation()
                         elif action.lower() == "exit" or action.lower() == "4":
                             break
+                elif action.lower() == "engage on bookmate" or action.lower() == "7":
+                    sub_action = input(Fore.GREEN + "Would you like to:\n"
+                                    + "1. See somebody else's profile\n"
+                                    + "2. Add/Remove someone from the friendlist\n"
+                                    + "3. Send a message to someone else\n"
+                                    + "4. Read received messages\n"
+                                    + Fore.RED + "Or:\n"
+                                    + "5. Exit\n" + Style.RESET_ALL
+                                    + "Type the corresponding number or function name: ")
+                    if sub_action.lower() == "see somebody else's profile" or sub_action.lower() == "1":
+                        friend_nickname = input("Enter the nickname of the friend: ")
+                        if friend_nickname in user_db.users:
+                            user_db.view_friend_profile(friend_nickname)
+                        else:
+                            print("Invalid choice. Please try again or type 'Exit' to go back.")
+                    elif sub_action.lower() == "add/remove someone from the friendlist" or sub_action.lower() == "2":
+                        action = input("Would you like to add or remove a friend? Type \"add\" or \"remove\": ")
+
+                        if action.lower() == "add":
+                            friend_nickname = input("Enter the nickname of the friend you want to add: ")
+                            user_db.add_friendship(user_db.current_user.alias, friend_nickname)
+
+                        elif action.lower() == "remove":
+                            friend_nickname = input("Enter the nickname of the friend you want to remove: ")
+                            user_db.remove_friendship(user_db.current_user.alias, friend_nickname)
+
+                        else:
+                            print("Invalid choice. Please try again.")
+                    elif sub_action.lower() == "send a message to someone else" or sub_action.lower() == "3":
+                        recipient_nickname = input("Enter the nickname of the person you want to send a message to: ")
+                        if recipient_nickname in user_db.users:
+                            recipient = user_db.users[recipient_nickname]
+                            message_content = input("Enter the content of your message: ")
+                            user_db.current_user.send_message(recipient, message_content)
+                        else:
+                            print("No user with the nickname {} found.".format(recipient_nickname))
+                    elif sub_action.lower() == "read received messages" or sub_action.lower() == "4":
+                        messages = user_db.current_user.received_messages
+                        for message in messages:
+                            print(f"From: {message.sender.alias}, Message: {message.content}")
+                    elif sub_action.lower() == "exit" or sub_action.lower() == "5":
+                        break
+                    else:
+                        print("Invalid choice. Please try again.")
+   
+                elif action.lower() == "exit" or action.lower() == "8":
+                    break
 
             else:
                 action = input("Would you like to log in, create a profile, or exit? Type \"login\", \"create profile\", or \"exit\" ")
@@ -210,17 +258,7 @@ def main():
                     print("Invalid choice. Please try again.")
 
 
-#1: Create a user profile: request personal data, desired nickname...
-    
-
-
-
-#2: Optionen: 1)Einsicht Bücherranking 2)Bücherbewertung einsehen/abgeben (Score + Kommentar) 3)Bücherempfehlung erhalten 4)BookMates (Social Platform) 5)Eigenes Profil einsehen
-
-
 
 if __name__ == "__main__":
     main()
 
-
-main()

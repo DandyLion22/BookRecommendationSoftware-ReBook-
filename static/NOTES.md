@@ -13,11 +13,14 @@
 
 4.BookMates (Social Platform)
 - Wie Profile längerfristig speicher (SQL?)? ++ -> JSON file
-- BookMate Menü erstellen
+- BookMate Menü erstellen ++
+- Option für das Empfangen von Nachrichten einbauen!!! ++
 - 
 5.Eigenes Profil einsehen
 - Persönliche Angaben (Lieblingsbücher, aktuell gelesenes Buch, etc...) ++
 
 
 6.Bug Testing/Fixing
+- komplett durchtesten
+- komplett kommentieren
 

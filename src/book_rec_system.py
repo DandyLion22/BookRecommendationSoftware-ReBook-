@@ -42,18 +42,22 @@ class Book:
     def get_title(self):
         return self.title
 
+    #rating a book and updating the average score simultaneously
     def rate_book(self, user_alias, rating):
         self.ratings[user_alias] = rating
         self.average_rating = sum(self.ratings.values()) / len(self.ratings)
     
 class Library:
+    #both arrays are getting updated in the following code
     def __init__(self):
         self.book_dicts = []  # list to store book dictionaries
         self.books = []  # list to store Book objects
 
+
     def add_book(self, book):
         self.books.append(book)
 
+    #adding real books; further books should be added as dictionaries in real_books
     def add_real_books(self):
         real_books = [
             {'author': 'J.K. Rowling', 'title': 'Harry Potter and the Philosopher\'s Stone', 'genre': 'Fantasy', 'year': 1997, 'topics': ['Magic', 'Coming of Age'], 'length': 'Long', 'complexity': 'Medium', 'purpose': 'Entertainment', 'mood': 'Exciting'},
@@ -68,6 +72,7 @@ class Library:
             {'author': 'F. Scott Fitzgerald', 'title': 'The Great Gatsby', 'genre': 'Fiction', 'year': 1925, 'topics': ['Wealth', 'American Dream'], 'length': 'Short', 'complexity': 'Medium', 'purpose': 'Entertainment', 'mood': 'Reflective'}
         ]
 
+        #book_dicts AND books getting updated
         for book in real_books:
             isbn = ''.join(random.choice('1234567890') for _ in range(13))  # Generate a random 13-digit ISBN
             book['isbn'] = isbn
@@ -82,14 +87,14 @@ class Library:
 
 
     def show_ranking(self):
-        # Create a max heap with the negative average ratings as the priorities
+        # Create a max heap with the negative average ratings as the priorities; negative rating because heapq creates a min-heap by default
         heap = [(-sum(book['ratings'].values()) / len(book['ratings']) if book['ratings'] else 0, book['title']) for book in self.book_dicts]
-        heapq.heapify(heap)
+        heapq.heapify(heap) #transforms list into heap
 
         books_ranking = "All books rankings: \n"
         rank = 1
         while heap:
-            avg_rating, title = heapq.heappop(heap)
+            avg_rating, title = heapq.heappop(heap) #in each iteration, it removes a. returns the book with the highest average rating from the heap
             books_ranking += f"{rank}: {title} -> {-avg_rating}\n"  # Negate the average rating to get the original value
             rank += 1
 
@@ -126,6 +131,7 @@ class User:
         self.user_id = User.next_id
         User.next_id += 1
         self.alias = alias
+        #checking if a hashed version of the password is provided; if not, it's created via hash_password()
         if password_hash is not None:
             self.password_hash = password_hash
         else:
@@ -140,8 +146,12 @@ class User:
         self.disliked_books = {}
         self.users_backup = {}
         self.users_backup[self.user_id] = self.alias
-        
-
+        self.sent_messages = []
+        self.received_messages = []
+         
+    #This is a static method that takes a plaintext password, encodes it to bytes using encode(), 
+    #hashes it using the SHA-256 algorithm with hashlib.sha256(), and then converts the hash object to a hexadecimal string with hexdigest(). 
+    #This hexadecimal string is the hashed password.
     @staticmethod
     def hash_password(password):
         return hashlib.sha256(password.encode()).hexdigest()
@@ -180,6 +190,16 @@ class User:
     
     def add_friend(self, friend):
         self.friends.append(friend)
+    
+
+    def send_message(self, other_user, content):
+        message = Message(self, other_user, content)
+        self.sent_messages.append(message)
+        other_user.received_messages.append(message)
+        print(f"Message sent from {self.alias} to {other_user.alias}: {message.content}")
+        print(f"Sent messages: {self.sent_messages}")
+        print(f"Recipient's received messages: {other_user.received_messages}") 
+
 
 class UserDatabase:
     def __init__(self):
@@ -225,14 +245,18 @@ class UserDatabase:
                 'read_books': user.read_books,
                 'friends': [friend.alias for friend in user.friends],
                 'disliked_books': user.disliked_books,
-                'users_backup': user.users_backup
+                'users_backup': user.users_backup,
+                'sent_messages': [{'recipient': message.recipient.alias, 'content': message.content} for message in user.sent_messages],
+                'received_messages': [{'sender': message.sender.alias, 'content': message.content} for message in user.received_messages]
             }
             profiles.append(profile)
         
+        # Write the profiles list to a file in JSON format
         with open('profiles.json', 'w') as f: 
             json.dump(profiles, f)
 
     def load_profiles(self):
+        # Load the profiles list from a file
         try:
             with open('profiles.json', 'r') as f:
                 profiles = json.load(f)
@@ -254,12 +278,28 @@ class UserDatabase:
             user.friends = profile.get('friends', [])
             user.disliked_books = profile.get('disliked_books')
             user.users_backup = profile.get('users_backup')
+
+            # Load sent and received messages
+            sent_messages = profile.get('sent_messages', [])
+            for message in sent_messages:
+                recipient = self.users.get(message['recipient'])
+                if recipient is not None:
+                    user.sent_messages.append(Message(user, recipient, message['content']))
+
+            received_messages = profile.get('received_messages', [])
+            for message in received_messages:
+                sender = self.users.get(message['sender'])
+                if sender is not None:
+                    user.received_messages.append(Message(sender, user, message['content']))
+
+            # Add the new user to the users dictionary and the graph
             self.add_user(user)
             self.graph.add_node(user.user_id)
 
 
     def login(self, alias=None):
         counter = 0
+        # If no alias is provided, ask the user for input one
         if alias is None:
             while True:
                 alias = input("Enter your nickname: ")
@@ -270,17 +310,20 @@ class UserDatabase:
             password = input("Enter your password: ")
             counter += 1
             input_password_hash = self.users[alias].hash_password(password)
+            # If the hashed password matches the stored password hash, log the user in
             if input_password_hash == self.users[alias].password_hash:
                 print("You have successfully logged in!")
                 self.current_user = self.users[alias]
                 self.logged_in = True
                 break
+            # If the password is incorrect, allow the user to try again up to 3 times
             if counter < 3:
                 print("Invalid password. Please try again.")
             else:
                 raise LoginFailedException
     
     def logout(self):
+        # Set the current user to None and change the logged in status to False
         self.current_user = None
         self.logged_in = False
         print("You have successfully logged out.")
@@ -290,15 +333,16 @@ class UserDatabase:
         friend = self.users[friend_alias]
         user.friends.append(friend)
         self.graph.add_edge(user_alias, friend_alias)
+        print("Successfully added friend!")
     
     def remove_friendship(self, user_alias, friend_alias):
         user = self.users[user_alias]
         friend = self.users[friend_alias]
         user.friends.remove(friend)
         self.graph.remove_edge(user_alias, friend_alias)
+        print("Successfully removed friend!")
 
-    def see_profile(self):
-        user = self.current_user
+    def see_profile(self, user):
         print(f"Name: {user.first_name} {user.last_name}")
         print(f"Alias: {user.alias}")
         print(f"Favorite Book: {user.favourite_book}")
@@ -308,8 +352,17 @@ class UserDatabase:
         print("Friends: ")
         for friend in user.friends:
             print(friend.alias) 
+    
+    def view_friend_profile(self, friend_alias):
+        for friend in self.current_user.friends:
+            if friend.alias == friend_alias:
+                self.see_profile(friend)
+                break
+        else:
+            print("Person doesn't exist or is not in your friend list!")
 
     def edit_profile(self):
+        # Allow the user to edit their profile information
         while True:
             from colorama import Fore, Style
 
@@ -386,7 +439,7 @@ class UserDatabase:
                 print("Invalid choice. Please try again.")
 
 
-
+# Self defined exception. LFE inherits all properties and behaviours from the standard Python Exception.
 class LoginFailedException(Exception):
     pass
 
@@ -398,9 +451,6 @@ class Rating:
             raise ValueError("Score must be between 1 and 10")
         self.score = score
         self.timestamp = datetime.now()
-
-    def filter_by(self):
-        pass
     
 class RecomEngine:
     def __init__(self, library):
@@ -525,5 +575,9 @@ class RatingSystem:
     def get_recommendations(self, user):
         pass
 
-        
+class Message:
+    def __init__(self, sender, recipient, content):
+        self.sender = sender
+        self.recipient = recipient
+        self.content = content 
 
